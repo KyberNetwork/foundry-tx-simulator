@@ -17,7 +17,6 @@ type SimulateRequest struct {
 	ERC721ApprovalOverrides []ERC721ApprovalOverride `json:"erc721ApprovalOverrides,omitempty" validate:"dive"`
 	StateOverride           *StateOverride           `json:"stateOverride,omitempty"`
 	StateOverrideBytecode   string                   `json:"stateOverrideBytecode,omitempty" validate:"hex_bytes"`
-	Compiler                *CompilerConfig          `json:"compiler,omitempty"`
 	DecodeInternal          bool                     `json:"decodeInternal"`
 	Sender                  string                   `json:"sender" validate:"required,eth_address"`
 	Target                  string                   `json:"target" validate:"required,eth_address"`
@@ -77,19 +76,6 @@ type ERC721ApprovalOverride struct {
 type StateOverride struct {
 	Source       string `json:"source"`
 	ContractName string `json:"contractName,omitempty"`
-}
-
-type CompilerConfig struct {
-	Use               string  `json:"use,omitempty"`
-	Offline           bool    `json:"offline,omitempty"`
-	NoAutoDetect      bool    `json:"noAutoDetect,omitempty"`
-	ViaIR             *bool   `json:"viaIR,omitempty"`
-	UseLiteralContent bool    `json:"useLiteralContent,omitempty"`
-	NoMetadata        bool    `json:"noMetadata,omitempty"`
-	EVMVersion        string  `json:"evmVersion,omitempty"`
-	Optimize          *bool   `json:"optimize,omitempty"`
-	OptimizerRuns     *uint32 `json:"optimizerRuns,omitempty"`
-	RevertStrings     string  `json:"revertStrings,omitempty"`
 }
 
 type HealthResponse struct {

@@ -158,12 +158,6 @@ Inside Docker, native project browsing is unavailable because the backend runs i
     "contractName": "MyStateOverride",
     "source": "// SPDX-License-Identifier: UNLICENSED\npragma solidity ^0.8.0;\ncontract MyStateOverride { fallback() external {} }"
   },
-  "compiler": {
-    "viaIR": true,
-    "optimize": true,
-    "optimizerRuns": 200,
-    "revertStrings": "default"
-  },
   "decodeInternal": false,
   "sender": "0x0000000000000000000000000000000000000000",
   "target": "0x0000000000000000000000000000000000000000",
@@ -184,7 +178,7 @@ to the final `forge-kyber test --json` command.
 
 `projectPath` is optional. When provided, the backend treats it as another Foundry project, runs `forge-kyber build src --root <projectPath>`, copies `contracts/test/SimulateTxRunner.t.sol` into a deterministic content-hash file under `<projectPath>/test/`, runs `forge-kyber test --json` against that copied test with `--root <projectPath>`, then removes the temporary test file after the last active run using it finishes. Relative paths are resolved against the backend repo root. Paths beginning with `~` are expanded to the backend process user's home directory before validation.
 
-`compiler` is optional and maps to popular Forge compiler flags. Supported fields are `use`, `offline`, `noAutoDetect`, `viaIR`, `useLiteralContent`, `noMetadata`, `evmVersion`, `optimize`, `optimizerRuns`, and `revertStrings`. The backend only passes `use` and `evmVersion` when they are explicitly provided. The state override `forge-kyber inspect` compile and final `forge-kyber test` run default `viaIR` and `optimize` to `true`; external-project `forge-kyber build src` uses the target project's defaults unless compiler fields are explicitly set.
+Compiler settings come from the selected Foundry project. The backend does not accept compiler options on the simulation request or add request-level compiler flags to `forge-kyber build`, `forge-kyber inspect`, or `forge-kyber test`.
 
 ## Tx Request
 

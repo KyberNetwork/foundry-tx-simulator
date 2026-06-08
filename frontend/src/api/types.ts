@@ -1,7 +1,6 @@
 export type {
   BalanceAnalysis,
   ChainConfig,
-  CompilerConfig,
   ERC20ApprovalOverride,
   ERC20BalanceOverride,
   ERC20Transfer,

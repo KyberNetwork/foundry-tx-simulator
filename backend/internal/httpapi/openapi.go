@@ -123,7 +123,6 @@ func registerOpenAPISchemas(schemas openapi3.Schemas) error {
 		{"ERC20ApprovalOverride", model.ERC20ApprovalOverride{}},
 		{"ERC721ApprovalOverride", model.ERC721ApprovalOverride{}},
 		{"StateOverride", model.StateOverride{}},
-		{"CompilerConfig", model.CompilerConfig{}},
 		{"SimulateResponse", model.SimulateResponse{}},
 		{"ERC20Transfer", model.ERC20Transfer{}},
 		{"BalanceAnalysis", model.BalanceAnalysis{}},
@@ -263,23 +262,6 @@ func enrichOpenAPISchemas(schemas openapi3.Schemas) {
 	setPropertyExample(schemas, "ERC721ApprovalOverride", "owner", "0x0000000000000000000000000000000000000001")
 	setPropertyExample(schemas, "ERC721ApprovalOverride", "spender", "0x0000000000000000000000000000000000000002")
 	setPropertyExample(schemas, "StateOverride", "contractName", "MyStateOverride")
-
-	setPropertyDescription(schemas, "CompilerConfig", "use", "Maps to forge-kyber --use <SOLC_VERSION>. Omitted unless explicitly provided.")
-	setPropertyDescription(schemas, "CompilerConfig", "offline", "Maps to --offline.")
-	setPropertyDescription(schemas, "CompilerConfig", "noAutoDetect", "Maps to --no-auto-detect.")
-	setPropertyDescription(schemas, "CompilerConfig", "viaIR", "Maps to --via-ir. Defaults to true for this backend.")
-	setPropertyDefault(schemas, "CompilerConfig", "viaIR", true)
-	setPropertyDescription(schemas, "CompilerConfig", "useLiteralContent", "Maps to --use-literal-content.")
-	setPropertyDescription(schemas, "CompilerConfig", "noMetadata", "Maps to --no-metadata.")
-	setPropertyDescription(schemas, "CompilerConfig", "evmVersion", "Maps to --evm-version <VERSION>. Omitted unless explicitly provided.")
-	setPropertyDescription(schemas, "CompilerConfig", "optimize", "Maps to --optimize. Defaults to true for this backend.")
-	setPropertyDefault(schemas, "CompilerConfig", "optimize", true)
-	setPropertyDescription(schemas, "CompilerConfig", "optimizerRuns", "Maps to --optimizer-runs <RUNS>.")
-	setPropertyMinMax(schemas, "CompilerConfig", "optimizerRuns", 0, 4294967295)
-	setPropertyExample(schemas, "CompilerConfig", "optimizerRuns", 200)
-	setPropertyDescription(schemas, "CompilerConfig", "revertStrings", "Maps to --revert-strings <REVERT>.")
-	setPropertyEnum(schemas, "CompilerConfig", "revertStrings", "default", "strip", "debug", "verboseDebug")
-	setPropertyExample(schemas, "CompilerConfig", "revertStrings", "default")
 
 	if schema := schemaValue(schemas, "Uint256"); schema != nil {
 		schema.Type = &openapi3.Types{"string"}

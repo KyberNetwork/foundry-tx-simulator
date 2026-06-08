@@ -35,19 +35,6 @@ export const stateOverrideSchema = z.object({
   source: z.string()
 });
 
-export const compilerConfigSchema = z.object({
-  use: z.string().optional(),
-  offline: z.boolean().optional(),
-  noAutoDetect: z.boolean().optional(),
-  viaIR: z.boolean().optional(),
-  useLiteralContent: z.boolean().optional(),
-  noMetadata: z.boolean().optional(),
-  evmVersion: z.string().optional(),
-  optimize: z.boolean().optional(),
-  optimizerRuns: z.number().int().min(0).max(4294967295).optional(),
-  revertStrings: z.enum(["default", "strip", "debug", "verboseDebug"]).optional()
-});
-
 export const chainConfigSchema = z.object({
   chains: z.array(z.string()).default([]),
   explorerUrls: z.record(z.string(), z.string()).default({})
@@ -84,7 +71,6 @@ export const simulateRequestSchema = z.object({
   erc20ApprovalOverrides: z.array(erc20ApprovalOverrideSchema).optional(),
   erc721ApprovalOverrides: z.array(erc721ApprovalOverrideSchema).optional(),
   stateOverride: stateOverrideSchema.optional(),
-  compiler: compilerConfigSchema.optional(),
   decodeInternal: z.boolean().default(false),
   sender: addressSchema,
   target: addressSchema,
@@ -166,7 +152,6 @@ export type ERC20BalanceOverride = z.infer<typeof erc20BalanceOverrideSchema>;
 export type ERC20ApprovalOverride = z.infer<typeof erc20ApprovalOverrideSchema>;
 export type ERC721ApprovalOverride = z.infer<typeof erc721ApprovalOverrideSchema>;
 export type StateOverride = z.infer<typeof stateOverrideSchema>;
-export type CompilerConfig = z.infer<typeof compilerConfigSchema>;
 export type ChainConfig = z.infer<typeof chainConfigSchema>;
 export type ProjectsResponse = z.infer<typeof projectsResponseSchema>;
 export type ProjectSourceFileRequest = z.infer<typeof projectSourceFileRequestSchema>;

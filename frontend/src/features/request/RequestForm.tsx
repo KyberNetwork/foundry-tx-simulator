@@ -499,50 +499,7 @@ function RunOptionsTab(props: { form: FormState; isTxRequest: boolean; onUpdate:
       <div className="toggle-grid">
         <Checkbox label="decode internal" checked={form.decodeInternal} onChange={(value) => onUpdate("decodeInternal", value)} />
         {isTxRequest && <Checkbox label="quick" checked={form.quick} onChange={(value) => onUpdate("quick", value)} />}
-        {!isTxRequest && (
-          <>
-            <Checkbox label="viaIR" checked={form.viaIR} onChange={(value) => onUpdate("viaIR", value)} />
-            <Checkbox label="optimize" checked={form.optimize} onChange={(value) => onUpdate("optimize", value)} />
-            <Checkbox label="offline" checked={form.offline} onChange={(value) => onUpdate("offline", value)} />
-            <Checkbox label="no metadata" checked={form.noMetadata} onChange={(value) => onUpdate("noMetadata", value)} />
-          </>
-        )}
       </div>
-      {!isTxRequest && (
-        <>
-          <div className="two-col">
-            <label>
-              Solc
-              <input value={form.compilerUse} onChange={(event) => onUpdate("compilerUse", event.target.value)} />
-            </label>
-            <label>
-              Optimizer Runs
-              <input
-                value={form.optimizerRuns}
-                inputMode="numeric"
-                placeholder="200"
-                onChange={(event) => onUpdate("optimizerRuns", event.target.value)}
-              />
-            </label>
-          </div>
-          <div className="two-col">
-            <label>
-              EVM Version
-              <input value={form.evmVersion} onChange={(event) => onUpdate("evmVersion", event.target.value)} />
-            </label>
-            <label>
-              Revert Strings
-              <select value={form.revertStrings} onChange={(event) => onUpdate("revertStrings", event.target.value)}>
-                <option value=""></option>
-                <option value="default">default</option>
-                <option value="strip">strip</option>
-                <option value="debug">debug</option>
-                <option value="verboseDebug">verboseDebug</option>
-              </select>
-            </label>
-          </div>
-        </>
-      )}
     </section>
   );
 }

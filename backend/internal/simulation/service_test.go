@@ -85,13 +85,6 @@ func TestSimulateWETHBalanceApprovalAndTransferFrom(t *testing.T) {
 				Amount:  model.Uint256(amount),
 			},
 		},
-		Compiler: &model.CompilerConfig{
-			ViaIR:         boolPtr(true),
-			Optimize:      boolPtr(true),
-			OptimizerRuns: uint32Ptr(200),
-			EVMVersion:    "cancun",
-			RevertStrings: "default",
-		},
 		DecodeInternal: true,
 		Sender:         spender,
 		Target:         wethAddress,
@@ -443,8 +436,8 @@ func TestSimulateExternalProjectBuildsSrcCompilesOverrideAndRunsCopiedTest(t *te
 	if !hasArgSequence(buildArgs, "build", "src") || !hasArgSequence(buildArgs, "--root", projectRoot) {
 		t.Fatalf("unexpected build args: %#v", buildArgs)
 	}
-	if containsArg(buildArgs, "--via-ir") {
-		t.Fatalf("build should use target project defaults unless request compiler fields are set: %#v", buildArgs)
+	if hasCompilerArg(buildArgs) {
+		t.Fatalf("build should use target project compiler settings: %#v", buildArgs)
 	}
 
 	inspectArgs := fake.calls[1]
@@ -453,6 +446,9 @@ func TestSimulateExternalProjectBuildsSrcCompilesOverrideAndRunsCopiedTest(t *te
 		!strings.HasSuffix(inspectArgs[1], ".sol:OverrideState") ||
 		!hasArgSequence(inspectArgs, "--root", projectRoot) {
 		t.Fatalf("unexpected inspect args: %#v", inspectArgs)
+	}
+	if hasCompilerArg(inspectArgs) {
+		t.Fatalf("inspect should use target project compiler settings: %#v", inspectArgs)
 	}
 
 	testArgs := fake.calls[2]
@@ -470,6 +466,9 @@ func TestSimulateExternalProjectBuildsSrcCompilesOverrideAndRunsCopiedTest(t *te
 		containsArg(testArgs, "--fork-block-number") ||
 		containsArg(testArgs, "--non-interactive") {
 		t.Fatalf("unexpected test args: %#v", testArgs)
+	}
+	if hasCompilerArg(testArgs) {
+		t.Fatalf("test should use target project compiler settings: %#v", testArgs)
 	}
 	if _, ok := envValue(fake.envs[2], inputPathEnvName); !ok {
 		t.Fatalf("forge test env missing input path: %#v", fake.envs)
@@ -1114,14 +1113,6 @@ func leftPadHex(value string, length int) string {
 	return strings.Repeat("0", length-len(value)) + value
 }
 
-func boolPtr(value bool) *bool {
-	return &value
-}
-
-func uint32Ptr(value uint32) *uint32 {
-	return &value
-}
-
 func forgeJSONTrace() string {
 	return forgeJSONTraceWithCall(true, "transfer")
 }
@@ -1383,6 +1374,27 @@ func hasArgSequence(args []string, want ...string) bool {
 func containsArg(args []string, want string) bool {
 	for _, arg := range args {
 		if arg == want {
+			return true
+		}
+	}
+	return false
+}
+
+func hasCompilerArg(args []string) bool {
+	compilerArgs := map[string]struct{}{
+		"--evm-version":         {},
+		"--no-auto-detect":      {},
+		"--no-metadata":         {},
+		"--offline":             {},
+		"--optimizer-runs":      {},
+		"--revert-strings":      {},
+		"--use":                 {},
+		"--use-literal-content": {},
+		"--via-ir":              {},
+	}
+	for _, arg := range args {
+		_, ok := compilerArgs[arg]
+		if ok || strings.HasPrefix(arg, "--optimize") {
 			return true
 		}
 	}

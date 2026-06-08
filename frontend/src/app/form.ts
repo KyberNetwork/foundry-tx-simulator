@@ -1,7 +1,6 @@
 import { simulateRequestSchema, txRequestSchema } from "../api/schemas";
 import { isAddress } from "../lib/labels";
 import type {
-  CompilerConfig,
   ERC20ApprovalOverride,
   ERC20BalanceOverride,
   ERC721ApprovalOverride,
@@ -38,14 +37,6 @@ export type FormState = {
   erc721ApprovalOverrides: ERC721ApprovalOverride[];
   stateContractName: string;
   stateSource: string;
-  compilerUse: string;
-  optimizerRuns: string;
-  evmVersion: string;
-  revertStrings: string;
-  viaIR: boolean;
-  optimize: boolean;
-  offline: boolean;
-  noMetadata: boolean;
   decodeInternal: boolean;
   quick: boolean;
 };
@@ -70,14 +61,6 @@ export const defaults: FormState = {
   erc721ApprovalOverrides: [],
   stateContractName: "",
   stateSource: "",
-  compilerUse: "",
-  optimizerRuns: "",
-  evmVersion: "",
-  revertStrings: "",
-  viaIR: true,
-  optimize: true,
-  offline: false,
-  noMetadata: false,
   decodeInternal: false,
   quick: false
 };
@@ -92,7 +75,6 @@ export function formFromRecord(record: SimulationRecord, apiUrl: string): FormSt
 }
 
 export function formFromSimulationRequest(request: SimulateRequest, apiUrl: string): FormState {
-  const compiler = request.compiler ?? {};
   const stateSource = request.stateOverride?.source ?? "";
   const stateContractName = request.stateOverride?.contractName ?? "";
   return {
@@ -113,14 +95,6 @@ export function formFromSimulationRequest(request: SimulateRequest, apiUrl: stri
     erc721ApprovalOverrides: request.erc721ApprovalOverrides ?? [],
     stateContractName,
     stateSource,
-    compilerUse: compiler.use ?? "",
-    optimizerRuns: compiler.optimizerRuns === undefined ? "" : String(compiler.optimizerRuns),
-    evmVersion: compiler.evmVersion ?? "",
-    revertStrings: compiler.revertStrings ?? "",
-    viaIR: compiler.viaIR ?? defaults.viaIR,
-    optimize: compiler.optimize ?? defaults.optimize,
-    offline: compiler.offline ?? defaults.offline,
-    noMetadata: compiler.noMetadata ?? defaults.noMetadata,
     decodeInternal: request.decodeInternal ?? defaults.decodeInternal,
     quick: defaults.quick
   };
@@ -156,27 +130,6 @@ export function buildSimulationRequest(form: FormState): SimulateRequest {
     throw new Error("blockNumber is required unless latest block is enabled");
   }
 
-  const compiler: CompilerConfig = {
-    viaIR: form.viaIR,
-    optimize: form.optimize
-  };
-  optionalString(compiler, "use", form.compilerUse);
-  optionalString(compiler, "evmVersion", form.evmVersion);
-  optionalString(compiler, "revertStrings", form.revertStrings);
-  if (form.offline) {
-    compiler.offline = true;
-  }
-  if (form.noMetadata) {
-    compiler.noMetadata = true;
-  }
-  if (form.optimizerRuns.trim()) {
-    const runs = Number(form.optimizerRuns);
-    if (!Number.isInteger(runs) || runs < 0) {
-      throw new Error("optimizerRuns must be a non-negative integer");
-    }
-    compiler.optimizerRuns = runs;
-  }
-
   const request: SimulateRequest = {
     chain: form.chain,
     blockNumber: form.useLatestBlock ? "" : form.blockNumber.trim(),
@@ -187,8 +140,7 @@ export function buildSimulationRequest(form: FormState): SimulateRequest {
     erc20BalanceOverrides: compactRows(form.erc20BalanceOverrides, ["token", "account", "balance"], "ERC20 balance overrides"),
     erc20ApprovalOverrides: compactRows(form.erc20ApprovalOverrides, ["token", "owner", "spender", "amount"], "ERC20 approval overrides"),
     erc721ApprovalOverrides: compactRows(form.erc721ApprovalOverrides, ["token", "owner", "spender", "tokenId"], "ERC721 approval overrides"),
-    decodeInternal: form.decodeInternal,
-    compiler
+    decodeInternal: form.decodeInternal
   };
 
   optionalString(request, "projectPath", form.projectPath);

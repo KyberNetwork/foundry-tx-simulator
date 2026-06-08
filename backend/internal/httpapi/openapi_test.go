@@ -61,8 +61,8 @@ func TestOpenAPIEndpoint(t *testing.T) {
 	if !ok {
 		t.Fatalf("missing schemas in spec: %#v", components)
 	}
-	if _, ok := schemas["CompilerConfig"]; !ok {
-		t.Fatalf("missing CompilerConfig schema: %#v", schemas)
+	if _, ok := schemas["CompilerConfig"]; ok {
+		t.Fatalf("CompilerConfig should not be exposed: %#v", schemas)
 	}
 	if _, ok := schemas["SimulationRecord"]; !ok {
 		t.Fatalf("missing SimulationRecord schema: %#v", schemas)
@@ -80,6 +80,9 @@ func TestOpenAPIEndpoint(t *testing.T) {
 	}
 	if _, ok := properties["projectSourceFiles"]; ok {
 		t.Fatalf("projectSourceFiles should be managed by /projects/default/source, not /simulation: %#v", properties)
+	}
+	if _, ok := properties["compiler"]; ok {
+		t.Fatalf("compiler options should follow project settings, not /simulation: %#v", properties)
 	}
 	if _, ok := properties["decodeInternal"]; !ok {
 		t.Fatalf("decodeInternal should be a request property: %#v", properties)

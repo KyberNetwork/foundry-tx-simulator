@@ -15,13 +15,6 @@ test("loads a saved request by request id", async ({ page }) => {
       contractName: "SavedOverride",
       source: "pragma solidity ^0.8.0; contract SavedOverride {}"
     },
-    compiler: {
-      viaIR: false,
-      optimize: true,
-      optimizerRuns: 300,
-      evmVersion: "cancun",
-      revertStrings: "debug"
-    },
     decodeInternal: true,
     sender: spender,
     target: token,
@@ -53,10 +46,8 @@ test("loads a saved request by request id", async ({ page }) => {
   await expect(page.getByLabel("Override Contract Name")).toHaveValue("SavedOverride");
   await expect(page.getByLabel("Override Contract Source")).toHaveValue("pragma solidity ^0.8.0; contract SavedOverride {}");
   await page.getByRole("button", { name: "Run Options" }).click();
-  await expect(page.getByLabel("Optimizer Runs")).toHaveValue("300");
-  await expect(page.getByLabel("EVM Version")).toHaveValue("cancun");
-  await expect(page.getByLabel("Revert Strings")).toHaveValue("debug");
   await expect(page.getByLabel("decode internal")).toBeChecked();
+  await expect(page.getByLabel("Solc")).toHaveCount(0);
 });
 
 test("editing the request id clears a stuck lookup", async ({ page }) => {
