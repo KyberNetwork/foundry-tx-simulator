@@ -432,16 +432,3 @@ func setPropertyPattern(schemas openapi3.Schemas, schemaName string, propertyNam
 		property.Pattern = pattern
 	}
 }
-
-func setPropertyEnum(schemas openapi3.Schemas, schemaName string, propertyName string, values ...any) {
-	if property := propertyValue(schemas, schemaName, propertyName); property != nil {
-		property.Enum = values
-	}
-}
-
-func setPropertyMinMax(schemas openapi3.Schemas, schemaName string, propertyName string, min float64, max float64) {
-	if property := propertyValue(schemas, schemaName, propertyName); property != nil {
-		property.Min = &min
-		property.Max = &max
-	}
-}
