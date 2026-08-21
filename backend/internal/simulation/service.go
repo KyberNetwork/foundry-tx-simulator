@@ -258,7 +258,7 @@ func (s *Service) Simulate(parent context.Context, req model.SimulateRequest) (m
 
 	if execution.BuildSrc {
 		slog.Info("forge build src started", "run_id", runID, "root", execution.Root)
-		buildResult := s.buildProjectSrc(ctx, execution, req.Compiler)
+		buildResult := s.buildProjectSrc(ctx, execution)
 		logForgeResult(runID, "build project src", buildResult)
 		if buildResult.Err != nil {
 			status := populateForgeFailure(&resp, start, buildResult, rpcURL, req.Chain, "build project src", buildResult.Err)
@@ -284,7 +284,7 @@ func (s *Service) Simulate(parent context.Context, req model.SimulateRequest) (m
 		slog.Info("state override source written", "run_id", runID, "contract", contractName, "path", statePath)
 
 		slog.Info("state override compile started", "run_id", runID, "root", execution.Root, "contract", contractName)
-		bytecode, compileResult, err := s.compileStateOverride(ctx, execution.Root, statePath, contractName, req.Compiler)
+		bytecode, compileResult, err := s.compileStateOverride(ctx, execution.Root, statePath, contractName)
 		logForgeResult(runID, "compile state override", compileResult)
 		if err != nil {
 			status := populateForgeFailure(&resp, start, compileResult, rpcURL, req.Chain, "compile state override", err)
@@ -322,8 +322,6 @@ func (s *Service) Simulate(parent context.Context, req model.SimulateRequest) (m
 	if req.DecodeInternal {
 		forgeArgs = append(forgeArgs, "--decode-internal")
 	}
-	compilerArgs := solidity.ForgeCompilerArgs(req.Compiler)
-	forgeArgs = append(forgeArgs, compilerArgs...)
 	if etherscanAPIKey != "" {
 		forgeArgs = append(forgeArgs, "--etherscan-api-key", etherscanAPIKey)
 	}
@@ -336,7 +334,6 @@ func (s *Service) Simulate(parent context.Context, req model.SimulateRequest) (m
 		"match_test", simulationTestName,
 		"anvil_rpc", anvilRPCURL,
 		"decode_internal", req.DecodeInternal,
-		"compiler_args", len(compilerArgs),
 	)
 	result := s.forge.RunWithEnv(ctx, []string{inputPathEnvName + "=" + inputPath}, forgeArgs...)
 	logForgeResult(runID, "forge test", result)
@@ -530,10 +527,6 @@ func (s *Service) validateRequest(ctx context.Context, req *model.SimulateReques
 	req.Data = normalizedData
 	ensureSenderLabel(req)
 
-	if err := validateCompilerConfig(req.Compiler); err != nil {
-		return "", err
-	}
-
 	return rpcURL, nil
 }
 
@@ -619,22 +612,6 @@ func pathSuffixes(value string) []string {
 		}
 	}
 	return suffixes
-}
-
-func validateCompilerConfig(config *model.CompilerConfig) error {
-	if config == nil {
-		return nil
-	}
-
-	config.Use = strings.TrimSpace(config.Use)
-	config.EVMVersion = strings.TrimSpace(config.EVMVersion)
-	config.RevertStrings = strings.TrimSpace(config.RevertStrings)
-	switch config.RevertStrings {
-	case "", "default", "strip", "debug", "verboseDebug":
-	default:
-		return fmt.Errorf("compiler.revertStrings must be one of default, strip, debug, or verboseDebug")
-	}
-	return nil
 }
 
 func (s *Service) prepareFoundryExecution(req *model.SimulateRequest, runID string) (foundryExecution, error) {
@@ -822,9 +799,8 @@ func (s *Service) releaseTestCopy(testPath string) {
 	}
 }
 
-func (s *Service) buildProjectSrc(ctx context.Context, execution foundryExecution, compiler *model.CompilerConfig) forge.Result {
+func (s *Service) buildProjectSrc(ctx context.Context, execution foundryExecution) forge.Result {
 	args := []string{"build", "src", "--root", execution.Root, "--color", "never"}
-	args = append(args, solidity.ForgeCompilerArgsExplicit(compiler)...)
 	return s.forge.Run(ctx, args...)
 }
 
@@ -888,14 +864,13 @@ func safeRunID(runID string) string {
 	return strings.NewReplacer(".", "_", "-", "_").Replace(runID)
 }
 
-func (s *Service) compileStateOverride(ctx context.Context, projectRoot string, sourcePath string, contractName string, compiler *model.CompilerConfig) (string, forge.Result, error) {
+func (s *Service) compileStateOverride(ctx context.Context, projectRoot string, sourcePath string, contractName string) (string, forge.Result, error) {
 	contractID, err := solidity.ContractIdentifier(projectRoot, sourcePath, contractName)
 	if err != nil {
 		return "", forge.Result{}, err
 	}
 
 	args := []string{"inspect", contractID, "bytecode", "--root", projectRoot, "--contracts", ".", "--color", "never"}
-	args = append(args, solidity.ForgeCompilerArgs(compiler)...)
 	result := s.forge.Run(ctx, args...)
 	if result.Err != nil {
 		return "", result, result.Err

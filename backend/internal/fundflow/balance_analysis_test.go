@@ -28,11 +28,8 @@ func TestAnalyzeBalanceChanges(t *testing.T) {
 		},
 	)
 
-	if analysis == nil {
-		t.Fatal("expected analysis")
-	}
-	if len(analysis.Changes) != 2 {
-		t.Fatalf("changes = %#v, want 2", analysis.Changes)
+	if analysis == nil || len(analysis.Changes) != 2 {
+		t.Fatalf("analysis = %#v, want 2 changes", analysis)
 	}
 
 	wantByUser := map[string]struct {

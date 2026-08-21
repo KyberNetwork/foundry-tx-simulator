@@ -178,6 +178,7 @@ test("adds source to the default project outside the simulation request", async 
     const request = route.request().postDataJSON() as {
       projectPath?: string;
       projectSourceFiles?: unknown;
+      compiler?: unknown;
       blockNumber?: string;
       sender?: string;
       target?: string;
@@ -185,6 +186,7 @@ test("adds source to the default project outside the simulation request", async 
     };
     expect(request.projectPath).toBe(defaultProjectPath);
     expect(request.projectSourceFiles).toBeUndefined();
+    expect(request.compiler).toBeUndefined();
     expect(JSON.stringify(request)).not.toContain("contract Token");
     await route.fulfill({
       status: 200,
@@ -246,12 +248,14 @@ test("exports and imports simulation input and output", async ({ page }, testInf
       target?: string;
       data?: string;
       decodeInternal?: boolean;
+      compiler?: unknown;
     };
     expect(request.blockNumber).toBe("23000000");
     expect(request.sender).toBe(spender);
     expect(request.target).toBe(token);
     expect(request.data).toBe("0x23b872dd");
     expect(request.decodeInternal).toBe(false);
+    expect(request.compiler).toBeUndefined();
     await route.fulfill({
       status: 200,
       contentType: "application/json",
@@ -479,7 +483,7 @@ test("uses configured explorer links and renders only the last main call subtree
   await addLabel(page, recipient, "WETHRecipient");
   await addLabel(page, searchOnlyAccount, "SearchOnlyAlias");
   await page.getByRole("button", { name: "Run Options" }).click();
-  await expect(page.getByLabel("Solc")).toBeVisible();
+  await expect(page.getByLabel("decode internal")).toBeVisible();
 
   await page.reload();
   await expect(page.getByText("online")).toBeVisible();
@@ -492,7 +496,7 @@ test("uses configured explorer links and renders only the last main call subtree
   await expect(page.getByLabel("Target")).toHaveValue(token);
   await expect(page.getByLabel("Calldata")).toHaveValue("0x23b872dd");
   await page.getByRole("button", { name: "Run Options" }).click();
-  await expect(page.getByLabel("Solc")).toBeVisible();
+  await expect(page.getByLabel("decode internal")).toBeVisible();
 
   await page.getByRole("button", { name: "Run Simulation" }).click();
   await expect(page.getByText("success |")).toBeVisible();
